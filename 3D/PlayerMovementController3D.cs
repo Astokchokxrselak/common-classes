@@ -10,7 +10,6 @@ using Common.Extensions;
 using Common.Helpers;
 using Common.Testing;
 
-/*
 namespace Parkour3D
 {
     public class PlayerMovementController3D : MobileEntity3D
@@ -65,9 +64,7 @@ namespace Parkour3D
             nextCameraPosition = Vector3.Lerp(DefaultCameraLocalPosition, BobbedCameraLocalPosition, Mathf.Cos(Mathf.PI * 2 * headBob.Ratio));
             cameraPosition = Vector3.Lerp(cameraPosition, nextCameraPosition, HeadLerpT);
             Camera.main.transform.position = transform.TransformPoint(cameraPosition);
-        }
-
-        
+        }*/
 
         private const float JumpDuration = 5f, MaxJumpSpeed = 12f;
         private const float PlatformCheckLength = 3f;
@@ -99,4 +96,3 @@ namespace Parkour3D
         }
     }
 }
-*/
