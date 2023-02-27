@@ -463,12 +463,6 @@ namespace Common
             public static T[] Near<T>(Vector2 position, float lookRadius, GameObject sender, string tag = null) where T : class
             {
                 var nearest = Physics2D.OverlapCircleAll(position, lookRadius).Where(col => col.gameObject != sender && (tag == null || col.CompareTag(tag))).Select(obj => obj.GetComponent<T>());
-                Debug.Log("Look Radius: " + lookRadius);
-                foreach (var n in nearest)
-                {
-                    var enemy = n as ShmupEnemy;
-                    Debug.Log("N Radius: " + Vector2.Distance(sender.transform.position, enemy.transform.position));
-                }
                 return nearest.ToArray();
             }
         }
