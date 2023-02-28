@@ -500,7 +500,7 @@ namespace Common
                 ResetSeed();
                 return num;
             }
-
+            public static bool RandomBool(float bias) => UnityEngine.Random.value < bias;
             public static float RandomSign() => MathHelper.Float01ToNegRange(UnityEngine.Random.value);
         }
     }

@@ -20,7 +20,7 @@ namespace Common.Pools
         public PhysicsPoolObject3D GetObject(Transform parent)
         {
             var obj = GetObject() as PhysicsPoolObject3D;
-            obj.Transform.parent = parent;
+            obj.SetParent(parent);
             return obj;
         }
         public PhysicsPoolObject3D GetObject(Vector3 position, Transform parent)

@@ -41,11 +41,11 @@ namespace Common
             /// </summary>
             ScreenShake3D,
             /// <summary>
-            /// Zoom 3D changes the Field of View (FOV) of the camera temporarily.
-            /// Frequency => Speed of zoom.
-            /// Force => Determines the new field of view (0 - 90, 10 - 1)
+            /// Slow Down temporarily changes the TimeScale.
+            /// Frequency => Frequency is the lerp T that timeScale is reset to default value. (0 - 1, 1 - 10)
+            /// Force => Determines the new TimeScale (1 - 0, 1 - 10)
             /// </summary>
-            Zoom3D
+            SlowDown
         }
         internal interface IScreenEffect
         {
@@ -191,17 +191,23 @@ namespace Common
                 }
             }
         }
-        /*internal class ZoomEffect3D : MeasuredScreenEffect, IScreenEffect
+        internal class SlowDown : MeasuredScreenEffect, IScreenEffect
         {
+            float initialTimeScale;
             public override void Init()
             {
-                
+                initialTimeScale = Time.timeScale;
             }
             public override void Update()
             {
-
+                var lerpT = Mathf.Lerp(0, 1, frequency * FrameCounter / FrameDuration);
+                Time.timeScale = Mathf.Lerp(force, initialTimeScale, lerpT);
+                if (IsDone)
+                {
+                    Time.timeScale = initialTimeScale;
+                }
             }
-        }*/
+        }
         #endregion
         static List<IScreenEffect> screenEffects = new List<IScreenEffect>();
         public static void Clear() => screenEffects.ForEach(effect => effect.IsDone = true);
@@ -209,7 +215,7 @@ namespace Common
         public static void Activate(Type type, float duration = 1f, float magnitude = 3f, bool scaled = true) // 1 - least, 10 - most
             // 1 - barely noticeable
             // 3 - default
-            // 10 - unsufferable
+            // 10 - insufferable
         {
             if (!MathHelper.Between(magnitude, 0f, 10f))
             {
@@ -244,6 +250,9 @@ namespace Common
                     #else
                         screenEffects.Add(new ScreenShake3D() { force = magnitude * 0.05f * CommonGameManager.ScreenshakeMultiplier, frequency = (int)((10 - magnitude) / 10 * frequencyMax3D) + 1 });
                     #endif
+                    break;
+                case Type.SlowDown:
+                    screenEffects.Add(new SlowDown() { force = 1f - Mathf.Log10(magnitude), frequency = Mathf.Log10(magnitude) });
                     break;
             }
             screenEffects.Last().FrameDuration = (int)(50 * duration);

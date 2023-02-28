@@ -25,7 +25,7 @@ namespace Common.Pools
         public Transform Transform { get => transform; }
         public GameObject GameObject { get => gameObject; }
         private BasePool pool;
-        public BasePool Pool { get => pool; set { pool = value; print("pool changed"); } }
+        public BasePool Pool { get => pool; set { pool = value; } }
         public void Destroy()
         {
             try
@@ -34,7 +34,6 @@ namespace Common.Pools
             }
             catch (System.NullReferenceException)
             {
-                print(gameObject.activeInHierarchy);
                 UnityEditor.Selection.activeGameObject = gameObject;
                 Debug.Break();
             }
