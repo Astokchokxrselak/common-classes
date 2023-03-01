@@ -522,6 +522,26 @@ namespace Common
                 return vector2.RotatedByRand(-angle, angle);
             }
             public static Vector3 XZComponents(this Vector3 vector3) => new(vector3.x, 0, vector3.z);
+            public static Vector3 Transform(this Vector3 vec3, int3 from, int3 to)
+            {
+                // Transform(Vector3(1, 5, -2), int3(1, 0, 2), int3(2, 2, 2))
+                // targ = 1
+                // targ = 0
+                // targ = 2
+                // for i in int3:
+                Vector3 vector3 = new();
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        if (to[j] == from[i])
+                        {
+                            vector3[j] = vec3[i];
+                        }
+                    }
+                }
+                return vec3;
+            }
         }
         public static class ComponentExtensions
         {
