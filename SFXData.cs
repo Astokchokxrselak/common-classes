@@ -8,6 +8,7 @@ namespace Common
     [RequireComponent(typeof(AudioSource))]
     public class SFXData : MonoBehaviour
     {
+        public string sourceFolder;
         public AudioClip this[string clip] => sfx[clip];
         Dictionary<string, AudioClip> sfx = new Dictionary<string, AudioClip>();
         public AudioClip GetSFX(string name)
@@ -36,7 +37,7 @@ namespace Common
             for (int i = 0; i < clipsPaths.Length; i++)
             {
                 var clipsPath = clipsPaths[i];
-                var clips = Resources.LoadAll<AudioClip>(clipsPath);
+                var clips = Resources.LoadAll<AudioClip>(sourceFolder + "/" + clipsPath);
                 foreach (var clip in clips)
                 {
                     sfx.TryAdd(clip.name, clip);
