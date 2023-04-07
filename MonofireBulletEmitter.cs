@@ -24,6 +24,7 @@ public class MonofireBulletEmitter : MonoBehaviour
         public int CurrentBulletIndex => _currentBulletIndex;
         public void ResetBulletIndex() => _currentBulletIndex = 0;
         private int _frameCounter;
+        public void ResetFrameCounter() => _frameCounter = 0;
         public void Start(GameObject @object)
         {
             this._object = @object;

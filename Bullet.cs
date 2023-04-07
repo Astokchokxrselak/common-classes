@@ -13,14 +13,17 @@ public class Bullet : PoolObject
     [HideInInspector]
     public Vector2 velocity;
     public Vector3 acceleration;
+    public float damage;
 
     public BulletInfo bulletInfo;
     [System.Flags]
     public enum BulletInfo
     {
         None = 0,
-        DontDieOffscreen = 1
+        DontDieOffscreen = 1,
+        Piercing = 2
     }
+    public bool HasInfo(BulletInfo info) => (bulletInfo & info) != 0;
     public enum BulletState
     {
 
@@ -33,6 +36,34 @@ public class Bullet : PoolObject
     {
         DefaultMotionAI();
         Accelerate();
+        CollisionUpdate();
+    }
+
+    private const int _SharedOverlapArrayCount = 9;
+    private static Collider2D[] _SharedOverlapArray = new Collider2D[_SharedOverlapArrayCount];
+    [Header("Collision Information")]
+    public string targetTag;
+    public Vector2 pivot;
+    public Vector2 size;
+    void CollisionUpdate()
+    {
+        var hit = Physics2D.OverlapBoxNonAlloc((Vector2)transform.position + new Vector2(-size.x / 2f, size.y / 2f) + pivot, size, transform.eulerAngles.z, _SharedOverlapArray);
+        for (int i = 0; i < hit; i++)
+        {
+            var target = _SharedOverlapArray[i];
+            if (target && targetTag == null || target.CompareTag(targetTag))
+            {
+                var damageable = target.GetComponentInChildren<IDamageable>();
+                if (damageable.Health > 0)
+                {
+                    damageable.TakeDamage(damage, creator);
+                    if (HasInfo(BulletInfo.Piercing))
+                    {
+                        Destroy();
+                    }
+                }
+            }
+        }
     }
     private void OnEnable()
     {
@@ -52,7 +83,7 @@ public class Bullet : PoolObject
     }
     private void OnBecameInvisible()
     {
-        if ((bulletInfo & BulletInfo.DontDieOffscreen) == 0)
+        if (!HasInfo(BulletInfo.DontDieOffscreen))
         {
             if (gameObject.scene.isLoaded)
             {
