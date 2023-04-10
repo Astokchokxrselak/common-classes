@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,6 +43,21 @@ namespace Common
         protected virtual void GameUpdate()
         {
 
+        }
+
+        private static IEnumerator _KillOffscreen(GameObject gObj)
+        {
+            while (Helpers.CameraHelper.ContainsWorldPoint(gObj.transform.position))
+                // while the object is still onscreen,
+            {
+                yield return null; // wait for it to become offscreen.
+            }
+            Destroy(gObj);
+        }
+        // Marks a game object to be destroyed when it goes offscreen.
+        public static void KillWhenOffscreen(GameObject gameObject)
+        {
+            instance.StartCoroutine(_KillOffscreen(gameObject));
         }
     }
 }

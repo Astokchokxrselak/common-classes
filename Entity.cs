@@ -9,7 +9,7 @@ public abstract class Entity : MobileEntity, IDamageable
     public float MaxHealth { get; set; }
     public virtual void TakeDamage(float damage, IDamageable other) { }
     public abstract void AI();
-    private void Update()
+    private void FixedUpdate()
     {
         AI();
     }

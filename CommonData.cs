@@ -302,12 +302,23 @@ namespace Common
                 var angle = Mathf.Atan2(diff.y, diff.x);
                 return Mathf.Rad2Deg * angle;
             }
+            public static float VectorAngle(Vector2 dir)
+            {
+                var angle = Mathf.Atan2(dir.y, dir.x);
+                return Mathf.Rad2Deg * angle;
+            }
             public static Vector2 AbsoluteVector2(Vector2 input) => new Vector2(Mathf.Abs(input.x), Mathf.Abs(input.y));
             public static Vector2Int AbsoluteVector2(Vector2Int input) => Vector2Int.FloorToInt(AbsoluteVector2((Vector2)input));
             public static bool XOR(params bool[] bools)
             {
-                var count = bools.Count(n => n);
-                return count == 1; // In XOR, only exactly one input will be true
+                int c = 0;
+                for (int i = 0; i < bools.Length; i++)
+                {
+                    if (bools[i])
+                        if (c++ == 1)
+                            return false;
+                }
+                return c == 1; // In XOR, only exactly one input will be true
             }
             public static float Ratio(Vector2 vector2) => vector2.x / vector2.y;
             public static bool WithinPM(float a, float b, float range) => Between(a, (b - range, b + range));

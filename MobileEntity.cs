@@ -4,6 +4,9 @@ using System.Linq;
 using UnityEngine;
 using static UnityEngine.UI.Image;
 
+using Common.Extensions;
+using Common.Helpers;
+
 namespace Common
 {
     [DisallowMultipleComponent]
@@ -245,9 +248,10 @@ namespace Common
         /*
          * Methods common among different subclasses of MobileEntity
          */
-        public const bool DebugMode = true;
+        public const bool DebugMode = false;
         public bool IsObjectBelow(float objectMinDistance, params string[] tags) => IsObjectInDirectionFrom(Bottom, objectMinDistance, Vector2.down, tags);
         public bool IsPlatformBelow(float platformMinDistance) => IsObjectBelow(platformMinDistance, "Platform");
+        public bool IsPlatformBelowRelative(float platformMinDistance) => IsObjectInDirectionFrom(Bottom, platformMinDistance, -transform.up, "Platform");
         public bool IsObjectInDirection(float objectMinDistance, Vector2 direction, params string[] tags)
         {
             var origin = PositionNearTo(Position + (Vector3)direction * 10000);
@@ -257,19 +261,86 @@ namespace Common
         {
             HitsArray[0] = HitsArray[1] = default;
             Physics2D.RaycastNonAlloc(origin - direction * 0.01f, direction, HitsArray, objectMinDistance);
-            if (HitsArray[1])
+            if (DebugMode)
             {
-                print("Hit1: " + HitsArray[0].collider.name + ", Hit2: " + HitsArray[1].collider.name);
+                if (HitsArray[1])
+                {
+                    print("Hit1: " + HitsArray[0].collider.name + ", Hit2: " + HitsArray[1].collider.name);
+                }
+                Debug.DrawLine(origin, origin + direction * objectMinDistance, Color.red, Time.fixedDeltaTime);
             }
-            if (DebugMode) Debug.DrawLine(origin, origin + direction * objectMinDistance, Color.red, 0.05f);
             return HitsArray[0] && HitsArray[1] && (tags.Length == 0 || tags.Any((tag) => HitsArray[0].collider.CompareTag(tag) || HitsArray[1].collider.CompareTag(tag)));
+        }
+        public RaycastHit2D GetObjectBelow(float objectMinDirection, params string[] tags) => GetObjectInDirectionFrom(Bottom, objectMinDirection, Vector2.down, tags);
+        public RaycastHit2D GetObjectInDirectionFrom(Vector2 origin, float objectMinDistance, Vector2 direction, params string[] tags)
+        {
+            HitsArray[0] = HitsArray[1] = default;
+            Physics2D.RaycastNonAlloc(origin - direction * 0.01f, direction, HitsArray, objectMinDistance);
+            if (DebugMode)
+            {
+                if (HitsArray[1])
+                {
+                    print("Hit1: " + HitsArray[0].collider.name + ", Hit2: " + HitsArray[1].collider.name);
+                }
+                Debug.DrawLine(origin, origin + direction * objectMinDistance, Color.blue, Time.fixedDeltaTime);
+            }
+            if ((tags.Length == 0 || tags.Any((tag) => HitsArray[0].collider.CompareTag(tag) || HitsArray[1].collider.CompareTag(tag))))
+            {
+                return HitsArray[0].transform != transform ? HitsArray[0] : HitsArray[1];
+            }
+            return default;
         }
         public bool CanSee(Rigidbody2D other)
         {
-            Vector2 vec2Pos = Position;
-            var n = Collider.Raycast(other.position - vec2Pos, HitsArray);
-            if (DebugMode) Debug.DrawLine(Position, other.position + (other.position - vec2Pos), Color.red, 0.05f);
-            return HitsArray[0].rigidbody == other || HitsArray[1].rigidbody == other;
+            return CanSeeInDirection(other, other.position - (Vector2)Position);
+        }
+
+        public bool CanSeeInDirection(Rigidbody2D other, Vector2 direction, bool debug = false)
+        {
+            HitsArray[0] = HitsArray[1] = default;
+            var n = Collider.Raycast(direction, HitsArray);
+            /*if (DebugMode) */Debug.DrawLine(Position, other.position + direction, Color.red, 0.05f);
+
+            bool hitMyself = HitsArray[1].rigidbody == Rigidbody2D || HitsArray[0].rigidbody == Rigidbody2D;
+            if (hitMyself)
+            {
+                return HitsArray[0].rigidbody == other || HitsArray[1].rigidbody == other;
+            }
+            else
+            {
+                var closest = HitsArray[0].CompareTo(HitsArray[1]) > 0 // HitsArray[0] > HitsArray[1]
+                            ? HitsArray[1]
+                            : HitsArray[0];
+                if (debug)
+                {
+                    for (int i = 0; i < HitsArray.Length; i++)
+                    {
+                        if (!HitsArray[i].transform)
+                        {
+                            continue;
+                        }
+                        var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                        go.transform.position = HitsArray[i].point;
+                        go.name = HitsArray[i].transform.name;
+                        if (HitsArray[i].collider == closest.collider)
+                        {
+                            go.name += " (Closest in direction " + direction + ")";
+                        }
+                        Destroy(go, Time.fixedDeltaTime);
+                    }
+                    // Debug.Break();
+                }
+                return closest.rigidbody == other;
+            }
+        }
+
+        public float SquareDistance(Component other)
+        {
+            return SquareDistance(other.transform.position);
+        }
+        public float SquareDistance(Vector3 point)
+        {
+            return Vector3.Distance(Position, point);
         }
 
         /*

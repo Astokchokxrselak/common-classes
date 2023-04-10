@@ -21,7 +21,8 @@ public class Bullet : PoolObject
     {
         None = 0,
         DontDieOffscreen = 1,
-        Piercing = 2
+        Piercing = 2,
+        DieOnHitPlatform = 4
     }
     public bool HasInfo(BulletInfo info) => (bulletInfo & info) != 0;
     public enum BulletState
@@ -51,13 +52,21 @@ public class Bullet : PoolObject
         for (int i = 0; i < hit; i++)
         {
             var target = _SharedOverlapArray[i];
-            if (target && targetTag == null || target.CompareTag(targetTag))
+            if (!target)
+            {
+                continue;
+            }
+            if (target.CompareTag("Platform") && HasInfo(BulletInfo.DieOnHitPlatform))
+            {
+                Destroy();
+            }
+            else if (targetTag == null || target.CompareTag(targetTag))
             {
                 var damageable = target.GetComponentInChildren<IDamageable>();
                 if (damageable.Health > 0)
                 {
                     damageable.TakeDamage(damage, creator);
-                    if (HasInfo(BulletInfo.Piercing))
+                    if (!HasInfo(BulletInfo.Piercing))
                     {
                         Destroy();
                     }
