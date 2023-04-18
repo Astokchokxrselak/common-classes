@@ -27,7 +27,7 @@ namespace Common.UI
         {
             triggered = false;
         }
-        void EnableScreen(int screen)
+        public void EnableScreen(int screen)
         {
             bool killMe = false;
             for (int i = 0; i < parent.childCount; i++)

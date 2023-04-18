@@ -35,8 +35,10 @@ namespace Common.Pools
             }
             catch (System.NullReferenceException)
             {
+#if UNITY_EDITOR
                 UnityEditor.Selection.activeGameObject = gameObject;
                 Debug.Break();
+#endif
             }
         }
         public virtual void OnPoolObjectDestroyed()

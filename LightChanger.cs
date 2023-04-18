@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if false
 using UnityEngine.Rendering.Universal;
 
 public class ChristmasLights : MonoBehaviour
@@ -78,3 +79,4 @@ public class ChristmasLights : MonoBehaviour
         }
     }
 }
+#endif
