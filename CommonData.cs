@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Device;
 
 namespace Common
 {
@@ -436,6 +437,21 @@ namespace Common
                 return answer;
             }
         }
+
+        public static class UIHelper
+        {
+            public static void SetTexts(TMPro.TMP_Text[] texts, object[] values)
+            {
+                if (texts.Length != values.Length)
+                {
+                    throw new ArgumentException("Length of texts is not equal to length of values");
+                }
+                for (int i = 0; i < texts.Length; i++)
+                {
+                    texts[i].text = values[i].ToString();
+                }
+            }
+        }
         public static class DebugHelper
         {
             static int MaxLoopsBeforeTermination = 5000;
@@ -662,10 +678,34 @@ namespace Common
                     return default;
                 }
             }
+            public static string ArrToString<T>(this IEnumerable<T> seq)
+            {
+                string @out = "{ ";
+                foreach (var m in seq)
+                {
+                    @out += m.ToString() + ", ";
+                }
+                return @out + " }";
+            }
         }
         public static class AnimatorExtensions
         {
             public static float NormalizedTime(this Animator animator) => animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+        }
+        public static class TransformExtensions
+        {
+            public static void IsolateChild(this Transform transform, int index)
+            {
+                for (int i = 0; i < transform.childCount; i++)
+                {
+                    var child = transform.GetChild(i);
+                    if (i != index)
+                    {
+                        child.gameObject.SetActive(false);
+                    }
+                    else child.gameObject.SetActive(true);
+                }
+            }
         }
         public static class OtherExtensions
         {

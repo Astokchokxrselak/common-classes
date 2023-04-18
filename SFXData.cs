@@ -23,6 +23,21 @@ namespace Common
             source.PlayOneShot(sfx, volume);
             source.pitch = oldPitch;
         }
+        public Coroutine PlaySFXIndirect(string name, float volume = 1f, float pitch = 1f)
+        {
+            return StartCoroutine(IEnumPlaySFXIndirect(name, volume, pitch));
+        }
+        public IEnumerator IEnumPlaySFXIndirect(string name, float volume = 1f, float pitch = 1f) 
+        {
+            var sfx = GetSFX(name);
+            source.clip = sfx;
+            float oldPitch = source.pitch, oldVolume = source.volume;
+            source.loop = false; // just incase
+            source.Play();
+            yield return new WaitUntil(() => { print(!source.isPlaying); return !source.isPlaying; });
+            source.volume = oldVolume;
+            source.pitch = oldPitch;
+        }
         AudioSource source;
         public AudioSource Source => source;
         void Awake()
@@ -37,7 +52,15 @@ namespace Common
             for (int i = 0; i < clipsPaths.Length; i++)
             {
                 var clipsPath = clipsPaths[i];
-                var clips = Resources.LoadAll<AudioClip>(sourceFolder + "/" + clipsPath);
+                AudioClip[] clips;
+                if (!string.IsNullOrWhiteSpace(sourceFolder))
+                {
+                    clips = Resources.LoadAll<AudioClip>(sourceFolder + "/" + clipsPath);
+                }
+                else
+                {
+                    clips = Resources.LoadAll<AudioClip>(clipsPath);
+                }
                 foreach (var clip in clips)
                 {
                     sfx.TryAdd(clip.name, clip);
