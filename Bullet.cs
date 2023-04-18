@@ -16,6 +16,7 @@ public class Bullet : PoolObject
     public float damage;
 
     public BulletInfo bulletInfo;
+    private BulletInfo initialInfo;
     [System.Flags]
     public enum BulletInfo
     {
@@ -25,6 +26,10 @@ public class Bullet : PoolObject
         DieOnHitPlatform = 4
     }
     public bool HasInfo(BulletInfo info) => (bulletInfo & info) != 0;
+    public override void OnPoolObjectDestroyed()
+    {
+        bulletInfo = initialInfo;
+    }
     public enum BulletState
     {
 
@@ -38,6 +43,11 @@ public class Bullet : PoolObject
         DefaultMotionAI();
         Accelerate();
         CollisionUpdate();
+        if (TryGetComponent(out TrailRenderer t) && !t.emitting)
+        {
+            t.Clear();
+            t.emitting = true;
+        }
     }
 
     private const int _SharedOverlapArrayCount = 9;
@@ -77,6 +87,18 @@ public class Bullet : PoolObject
     private void OnEnable()
     {
         directionAtSpawn = direction;
+    }
+    private void OnDisable()
+    {
+        if (TryGetComponent(out TrailRenderer t))
+        {
+            t.emitting = false;
+        }
+    }
+    private void Start()
+    {
+        initialInfo = bulletInfo;
+        if (TryGetComponent(out TrailRenderer t)) t.Clear();
     }
     void NormalAI()
     {

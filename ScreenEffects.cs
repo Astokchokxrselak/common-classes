@@ -193,23 +193,29 @@ namespace Common
         }
         internal class SlowDown : MeasuredScreenEffect, IScreenEffect
         {
-            float initialTimeScale;
             public override void Init()
             {
-                initialTimeScale = Time.timeScale;
+            
             }
             public override void Update()
             {
                 var lerpT = Mathf.Lerp(0, 1, frequency * FrameCounter / FrameDuration);
-                Time.timeScale = Mathf.Lerp(force, initialTimeScale, lerpT);
+                Time.timeScale = Mathf.Lerp(force, CommonGameManager.instance.defaultTimeScale, lerpT);
                 if (IsDone)
                 {
-                    Time.timeScale = initialTimeScale;
+                    Time.timeScale = CommonGameManager.instance.defaultTimeScale;
                 }
             }
         }
         #endregion
         static List<IScreenEffect> screenEffects = new List<IScreenEffect>();
+        private static readonly Dictionary<Type, System.Type> typeMatch = new()
+        {
+            { Type.ScreenShake, typeof(ScreenShake) },
+            { Type.ScreenShake3D, typeof(ScreenShake3D) },
+            { Type.SlowDown, typeof(SlowDown) }
+        };
+        public static bool EffectIsOn(Type type) => screenEffects.Any(se => typeMatch[type] == se.GetType());
         public static void Clear() => screenEffects.ForEach(effect => effect.IsDone = true);
         public static void KillPause() => screenEffects.FindAll(effect => effect is Pause).ForEach(effect => effect.IsDone = true);
         public static void Activate(Type type, float duration = 1f, float magnitude = 3f, bool scaled = true) // 1 - least, 10 - most
@@ -252,7 +258,14 @@ namespace Common
                     #endif
                     break;
                 case Type.SlowDown:
-                    screenEffects.Add(new SlowDown() { force = 1f - Mathf.Log10(magnitude), frequency = Mathf.Log10(magnitude) });
+                    if (!EffectIsOn(Type.SlowDown)) 
+                    {
+                        screenEffects.Add(new SlowDown() { force = 1f - Mathf.Log10(magnitude), frequency = Mathf.Log10(magnitude) });
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Cannot create a new Type.SlowDown ScreenEffect; a Type.Slowdown ScreenEffect is already in progress");
+                    }
                     break;
             }
             screenEffects.Last().FrameDuration = (int)(50 * duration);

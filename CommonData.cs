@@ -135,7 +135,7 @@ namespace Common
         }
         public float SetMax() => timer = Max;
         public float SetZero() => timer = 0;
-        public float Ratio => Max == 0 ? 0 : timer / Max;
+        public float Ratio => Max == 0 ? 0f : timer / max;
         public static explicit operator float(Timer timer) => timer.timer;
         public static Timer operator -(Timer timer, float flt) => new Timer(timer.timer - flt, timer.Max);
         public static Timer operator +(Timer timer, float flt) => new Timer(timer.timer - flt, timer.Max);

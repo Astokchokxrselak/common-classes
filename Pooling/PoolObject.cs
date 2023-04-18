@@ -30,6 +30,7 @@ namespace Common.Pools
         {
             try
             {
+                OnPoolObjectDestroyed();
                 Pool.Return(this);
             }
             catch (System.NullReferenceException)
@@ -37,6 +38,10 @@ namespace Common.Pools
                 UnityEditor.Selection.activeGameObject = gameObject;
                 Debug.Break();
             }
+        }
+        public virtual void OnPoolObjectDestroyed()
+        {
+
         }
     }
 }
