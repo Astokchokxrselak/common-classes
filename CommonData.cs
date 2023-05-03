@@ -118,6 +118,10 @@ namespace Common
         {
             return ClampedIncrement(Time.unscaledDeltaTime);
         }
+        public float ClampedIncrement(bool scaled)
+        {
+            return ClampedIncrement(scaled ? Time.deltaTime : Time.unscaledDeltaTime);
+        }
         public float ClampedIncrement(float d) // keeps within the range [0, 1]
         {
             Increment(d);
@@ -136,6 +140,7 @@ namespace Common
         }
         public float SetMax() => timer = Max;
         public float SetZero() => timer = 0;
+        public float ClampedRatio => Mathf.Clamp01(Ratio);
         public float Ratio => Max == 0 ? 0f : timer / max;
         public static explicit operator float(Timer timer) => timer.timer;
         public static Timer operator -(Timer timer, float flt) => new Timer(timer.timer - flt, timer.Max);
@@ -419,6 +424,7 @@ namespace Common
             }
             public static Vector2 CenteredMousePosition() => CenteredMousePosition(Camera.main);
             public static Vector2 WorldMousePosition => Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            public static Vector3 WorldMousePosition3D(float z) => Camera.main.ScreenToWorldPoint(Input.mousePosition + Vector3.forward * z);
         }
         public static class SpriteHelper
         {
@@ -528,7 +534,7 @@ namespace Common
                 return num;
             }
             public static bool RandomBool(float bias) => UnityEngine.Random.value < bias;
-            public static float RandomSign() => MathHelper.Float01ToNegRange(UnityEngine.Random.value);
+            public static float RandomSigned() => MathHelper.Float01ToNegRange(UnityEngine.Random.value);
         }
     }
     namespace Extensions
@@ -552,11 +558,13 @@ namespace Common
             public static Vector3 Transform(this Vector3 vec3, int3 from, int3 to)
             {
                 // Transform(Vector3(1, 5, -2), int3(1, 0, 2), int3(2, 2, 2))
+                // IntOut: Vector3(-2, -2, -2)
+
                 // targ = 1
                 // targ = 0
                 // targ = 2
                 // for i in int3:
-                Vector3 vector3 = new();
+                Vector3 vector3 = vec3;
                 for (int i = 0; i < 3; i++)
                 {
                     for (int j = 0; j < 3; j++)
@@ -567,7 +575,7 @@ namespace Common
                         }
                     }
                 }
-                return vec3;
+                return vector3;
             }
         }
         public static class ComponentExtensions
@@ -642,6 +650,16 @@ namespace Common
                         return interf;
                     }
                 } return null;
+            }
+
+            public static Vector3 CenterOfMass(this Transform transform)
+            {
+                Vector3 sum = Vector3.zero;
+                foreach (Transform t in transform)
+                {
+                    sum += t.position;
+                }
+                return sum / transform.childCount;
             }
         }
         public static class SequenceExtensions

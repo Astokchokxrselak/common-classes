@@ -115,7 +115,7 @@ public class DialogueManager1 : MonoBehaviour
         index = -1;
         // Update();
         backdrop1.color = backdrop2.color = Color.clear;
-        PauseButtonScript.canBePaused = false;
+        PauseManager.canBePaused = false;
         ScreenEffects.Clear();
     }
 
@@ -132,7 +132,7 @@ public class DialogueManager1 : MonoBehaviour
         moveToNextLine = Input.GetKeyDown(KeyCode.Space);
         if (index < lines.Length)
         {
-            PauseButtonScript.canBePaused = false;
+            PauseManager.canBePaused = false;
             LerpBoxPositions();
             LerpPeoplePositions();
             LerpPeopleColors();
@@ -372,7 +372,7 @@ public class DialogueManager1 : MonoBehaviour
     {
         frameCounter = 0;
         Time.timeScale = 1f;
-        PauseButtonScript.canBePaused = true;
+        PauseManager.canBePaused = true;
         for (int i = 0; i < 2; i++)
         {
             transform.GetChild(i).gameObject.SetActive(false);

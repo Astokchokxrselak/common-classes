@@ -21,9 +21,12 @@ namespace Common.UI
         public void Awake()
         {
             OnInitialize(); // Initializes necessary data used by the OnButton script.
-            button = GetComponent<Button>();
+            TryGetComponent(out button);
             OnButtonClicked += OnButtonClick;
-            button.onClick.AddListener(() => OnButtonClicked());
+            if (button)
+            {
+                button.onClick.AddListener(() => OnButtonClicked());
+            }
         }
         public virtual void OnButtonClick()
         {

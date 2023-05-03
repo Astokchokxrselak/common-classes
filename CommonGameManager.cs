@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Common
 {
@@ -17,6 +18,7 @@ namespace Common
         public float screenshakeMultiplier = 1f;
 
         public static Vector2 MouseDelta => Input.mousePosition - instance.oldMouse;
+        public static Vector2 MouseVector => new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y") * InvertedMouseYToggle.Multiplier) * MouseSensitivitySlider.mouseSensitivity;
         private void Awake()
         {
             instance = this;
@@ -24,6 +26,7 @@ namespace Common
             ScreenEffects.FadeScreen(this, fadeInTime, Color.black, Color.clear, false);
             Time.timeScale = defaultTimeScale;
             ScreenshakeMultiplier = screenshakeMultiplier;
+            MouseSensitivitySlider.mouseSensitivity = 1f;
             GameAwake();
         }
         private void Update()
@@ -58,6 +61,16 @@ namespace Common
         public static void KillWhenOffscreen(GameObject gameObject)
         {
             instance.StartCoroutine(_KillOffscreen(gameObject));
+        }
+        public static void SwitchScenes(int nextScene, float fadeToBlackTime)
+        {
+            if (fadeToBlackTime != 0)
+            {
+                ScreenEffects.ForceFadeScreen(instance, fadeToBlackTime, Color.clear, Color.black, false);
+                MusicManager.Fadeout(fadeToBlackTime);
+                ScreenEffects.OnScreenFaded += () => SceneManager.LoadScene(nextScene);
+            }
+            else SceneManager.LoadScene(nextScene);
         }
     }
 }

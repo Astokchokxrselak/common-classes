@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Common.Testing
 {
+#if UNITY_EDITOR
     public class DebugShortcuts : MonoBehaviour
     {
         private static readonly Dictionary<string, KeyCode> shortcuts = new()
@@ -71,4 +72,5 @@ namespace Common.Testing
             Time.timeScale = SlowSpeedFactor;
         }
     }
+#endif
 }

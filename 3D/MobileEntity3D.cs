@@ -97,6 +97,13 @@ namespace Common3D
         #region Sprite Related Data
         public Sprite Sprite => SpriteRenderer.sprite;
         #endregion
+        #region Transform Related Data
+        public Quaternion QuaternionRotation
+        {
+            get => transform.rotation;
+            set => transform.rotation = value;
+        }
+        #endregion
         public virtual void OnAwake()
         {
         }
@@ -110,23 +117,28 @@ namespace Common3D
         }
         void MiscellaneousInit()
         {
-            platformBelowRay = new Ray(transform.position, Vector3.down);
+            platformRay = new Ray(transform.position, Vector3.down);
         }
 
-        private Ray platformBelowRay;
+        private Ray platformRay;
         public bool IsPlatformBelow(float distance)
         {
             return PlatformBelow(distance) != null;
         }
+        public bool IsPlatformInDirection(float distance, Vector3 direction)
+        {
+            return PlatformInDirection(distance, direction) != null;
+        }
 
         const float PlatformCheckYOffset = 0.1f;
-        public Collider PlatformBelow(float distance)
+        public Collider PlatformInDirection(float distance, Vector3 direction)
         {
-            platformBelowRay.origin = Bounds.center;
-            var cast = Physics.Raycast(platformBelowRay, out RaycastHit hit, distance);
+            platformRay.direction = direction;
+            platformRay.origin = Bounds.center;
+            var cast = Physics.Raycast(platformRay, out RaycastHit hit, distance);
             if (Common.MobileEntity.DebugMode)
             {
-                Debug.DrawLine(platformBelowRay.origin, platformBelowRay.origin + platformBelowRay.direction * distance, Color.red, 0.05f);
+                Debug.DrawLine(platformRay.origin, platformRay.origin + platformRay.direction * distance, Color.red, 0.05f);
                 /*if (cast)
                 {
                     Debug.Break();
@@ -134,14 +146,18 @@ namespace Common3D
             }
             return hit.collider;
         }
+        public Collider PlatformBelow(float distance)
+        {
+            return PlatformInDirection(distance, Vector3.down);
+        }
         public Collider PlatformBelowBoxcast(float distance, Vector2 size)
         {
-            platformBelowRay.origin = transform.position;
-            var cast = Physics.BoxCast(platformBelowRay.origin, size / 2f, platformBelowRay.direction, out RaycastHit hit, RotationQuaternion, distance);
+            platformRay.origin = transform.position;
+            var cast = Physics.BoxCast(platformRay.origin, size / 2f, platformRay.direction, out RaycastHit hit, RotationQuaternion, distance);
             print("Boxcast: " + cast);
             if (Common.MobileEntity.DebugMode)
             {
-                Debug.DrawLine(platformBelowRay.origin, platformBelowRay.origin + platformBelowRay.direction * distance, Color.yellow, 0.05f);
+                Debug.DrawLine(platformRay.origin, platformRay.origin + platformRay.direction * distance, Color.yellow, 0.05f);
             }
             return hit.collider;
         }
@@ -151,7 +167,7 @@ namespace Common3D
         }
         public Vector3 DirectionTo(Vector3 point)
         {
-            return (Position - point).normalized;
+            return (point - Position).normalized;
         }
         public float SquareDistanceXYZ(Component other)
         {

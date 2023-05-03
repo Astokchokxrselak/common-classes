@@ -17,6 +17,8 @@ namespace Common.UI
         public bool update, disableOnStart = false;
         public bool coolParticlesOn;
 
+        public Color fullColor, emptyColor;
+
 //        [ConditionalField("coolParticlesOn")]
         public Vector3 particleSystemPositionLeft;
 //        [ConditionalField("coolParticlesOn")]
@@ -29,6 +31,7 @@ namespace Common.UI
             {
                 CreateCoolParticleEffect();
             }
+            UpdateBar(damageable);
         }
         void AttachToFocus()
         {
@@ -88,7 +91,7 @@ namespace Common.UI
         }
         private void Update()
         {
-            if (update && damageable.Health / damageable.MaxHealth != bar.Ratio)
+            if (update)// && damageable.Health / damageable.MaxHealth != bar.Ratio)
             UpdateBar(damageable);
         }
         public void ShowBar()
@@ -126,6 +129,7 @@ namespace Common.UI
         public void UpdateBar(IDamageable reference)
         {
             bar.Ratio = reference.Health / reference.MaxHealth;
+            bar.bar.color = Color.Lerp(emptyColor, fullColor, bar.Ratio);
         }
     }
 }

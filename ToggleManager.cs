@@ -10,17 +10,17 @@ namespace Common
 {
     public class ToggleManager : MonoBehaviour
     {
-        Dictionary<string, Toggle> toggleDict;
+        private Dictionary<string, Toggle> _toggleDict;
         public string[] togglesNames;
         public Toggle[] toggles;
         public bool this[string key]
         {
-            get => toggleDict[key].isOn; // Get whether the toggle of the specific name is on or not.
-            set => toggleDict[key].isOn = value; // Set the toggle of the specific name off or on.
+            get => _toggleDict[key].isOn; // Get whether the toggle of the specific name is on or not.
+            set => _toggleDict[key].isOn = value; // Set the toggle of the specific name off or on.
         }
         private void Awake()
         {
-            toggleDict = CollectionsHelper.ListsToDict(togglesNames, toggles);
+            _toggleDict = CollectionsHelper.ListsToDict(togglesNames, toggles);
         }
     }
 }

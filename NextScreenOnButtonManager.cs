@@ -8,6 +8,9 @@ namespace Common.UI
 {
     public class NextScreenOnButtonManager : MonoBehaviour
     {
+        public float fadeOutTimeAtEnd = -1; // -1 to mean do not fadeout
+        public int nextScene = -1; // -1 to mean not applicable
+        [Space()]
         public bool loop, resetOnDisable;
         public int currentIndex;
         public int CurrentIndex
@@ -22,6 +25,15 @@ namespace Common.UI
                 }
                 else
                 {
+                    print(currentIndex);
+                    if (currentIndex >= transform.childCount)
+                    {
+                        if (fadeOutTimeAtEnd != -1)
+                        {
+                            CommonGameManager.SwitchScenes(nextScene, fadeOutTimeAtEnd);
+                            return;
+                        }
+                    }
                     currentIndex = System.Math.Clamp(currentIndex, 0, transform.childCount - 1);
                 }
 

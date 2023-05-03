@@ -50,7 +50,7 @@ namespace Common.Pools
                     }
                     Objects[i].Transform.rotation = rotation;
                     Objects[i].Transform.position = position;
-                    Objects[i].Transform.parent = null;
+                    Objects[i].Transform.SetParent(null, false);
                     return Objects[i];
                 }
             }

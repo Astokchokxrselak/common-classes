@@ -45,7 +45,10 @@ namespace Common
             /// Frequency => Frequency is the lerp T that timeScale is reset to default value. (0 - 1, 1 - 10)
             /// Force => Determines the new TimeScale (1 - 0, 1 - 10)
             /// </summary>
-            SlowDown
+            SlowDown,
+            /// <summary>
+            /// Screen Flash flashes a color onscreen
+            /// </summary>
         }
         internal interface IScreenEffect
         {
@@ -291,9 +294,22 @@ namespace Common
             OnScreenFaded = null;
             OnPauseDone = null;
         }
+        private static IEnumerator _FlashScreen(float duration, Color flashColor, bool scaled = true)
+        {
+            Color oldColor = Screen.color;
+            SetScreen(flashColor);
+            if (scaled)
+                yield return new WaitForSeconds(duration);
+            else
+                yield return new WaitForSecondsRealtime(duration);
+            SetScreen(oldColor);
+        }
+        public static Coroutine FlashScreen(MonoBehaviour source, float duration, Color flashColor, bool scaled = true)
+        {
+            return source.StartCoroutine(_FlashScreen(duration, flashColor, scaled));
+        }
         public static Coroutine FadeScreen(MonoBehaviour source, float time, Color beforeColor, Color afterColor, bool scaled = true)
         {
-            Debug.Log(fadingScreen);
             if (!fadingScreen)
             {
                 return ForceFadeScreen(source, time, beforeColor, afterColor, scaled);

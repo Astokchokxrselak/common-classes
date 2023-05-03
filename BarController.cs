@@ -8,7 +8,7 @@ namespace Common.UI
     public readonly struct Bar
     {
         readonly Transform parent;
-        readonly Image bar;
+        public readonly Image bar;
         public Bar(Image bar)
         {
             this.parent = bar.transform.parent;
@@ -26,7 +26,10 @@ namespace Common.UI
         public float Ratio
         {
             get => bar.fillAmount;
-            set => bar.fillAmount = value;
+            set
+            {
+                bar.fillAmount = value;
+            }
         }
     }
 
