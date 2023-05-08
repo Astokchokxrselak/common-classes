@@ -47,7 +47,11 @@ namespace Common
         {
 
         }
-
+        public const float _FarFarAway = 9e9f;
+        public static void SendToTheVoid(Transform transform)
+        {
+            transform.position = Vector3.one * _FarFarAway;
+        }
         private static IEnumerator _KillOffscreen(GameObject gObj)
         {
             while (Helpers.CameraHelper.ContainsWorldPoint(gObj.transform.position))

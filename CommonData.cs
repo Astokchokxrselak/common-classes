@@ -22,6 +22,7 @@ namespace Common
         private List<float> weights;
         private readonly float sum;
         public int WeightCount => weights.Count;
+        public float Sum => sum;
         public WeightedFloatRandom(int count, float expectedSum)
         {
             weights = new List<float>(count);
@@ -33,8 +34,9 @@ namespace Common
         }
         public int GetIndex(float @in)
         {
-            float sum = weights[0];
-            for (int i = 0; i < weights.Count; sum += weights[++i])
+            float sum = 0;
+            Debug.Log(weights.Count);
+            for (int i = 0; i < weights.Count; sum += weights[i++])
             {
                 if (sum > @in)
                 {

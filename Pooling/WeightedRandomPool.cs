@@ -13,11 +13,11 @@ public class WeightedRandomPool : Pool
     {
         if (count % objectReferences.Length != 0)
         {
-            Debug.LogWarningFormat("WeightedRandomPool: Number of object instances is not divisible by number of object references({0}{1}, r={2})", weights.WeightCount, objectReferences.Length, weights.WeightCount % objectReferences.Length);
+            Debug.LogWarningFormat(this, "WeightedRandomPool: Number of object instances is not divisible by number of object references({0}{1}, r={2})", weights.WeightCount, objectReferences.Length, weights.WeightCount % objectReferences.Length);
         }
         else if (weights.WeightCount != objectReferences.Length)
         {
-            Debug.LogWarningFormat("WeightedRandomPool: Number of weights is not equal to number of object references");
+            Debug.LogWarningFormat(this, "WeightedRandomPool: Number of weights is not equal to number of object references");
         }
     }
 
@@ -64,7 +64,7 @@ public class WeightedRandomPool : Pool
     }
     public IPoolObject GetObject()
     {
-        var type = weights.GetIndex(Random.value);
+        var type = weights.GetIndex(Random.value * weights.Sum);
         return GetObject(type);
     }
 }
