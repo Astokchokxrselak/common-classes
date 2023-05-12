@@ -64,7 +64,9 @@ public class WeightedRandomPool : Pool
     }
     public IPoolObject GetObject()
     {
+        print("sum: " + weights.Sum);
         var type = weights.GetIndex(Random.value * weights.Sum);
+        print("TYPE: "+ type);
         return GetObject(type);
     }
 }

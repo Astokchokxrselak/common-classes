@@ -295,8 +295,8 @@ public class DialogueManager1 : MonoBehaviour
         if ((lines[index].event2 & SpeakerLine.SpeakerEvent.RunAway) != 0)
         {
             var personRect = person2.rectTransform;
-            Vector2 startPosition = new Vector2(initPersonX, personRect.anchoredPosition.y),
-                    endPosition = new Vector2(initPersonX * LeaveMultiplier, personRect.anchoredPosition.y);
+            Vector2 startPosition = new Vector2(-initPersonX, personRect.anchoredPosition.y),
+                    endPosition = new Vector2(-initPersonX * LeaveMultiplier, personRect.anchoredPosition.y);
             personRect.anchoredPosition = Vector2.Lerp(startPosition, endPosition, Mathf.Pow(frameCounter / FrameDelayBeforeFinish, 2));
         }
     }
