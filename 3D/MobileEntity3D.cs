@@ -81,22 +81,17 @@ namespace Common3D
         #region Bounds Related Data
         private Bounds? NColliderBounds => Collider == null ? null : Collider.bounds;
         public Bounds ColliderBounds => NColliderBounds.Value;
-        private Bounds? NSpriteBounds => SpriteRenderer == null ? null : SpriteRenderer.bounds;
-        public Bounds SpriteBounds => NSpriteBounds.Value;
         [HideInInspector]
         public Bounds Bounds
         {
             get
             {
-                return (Bounds)(NColliderBounds ?? NSpriteBounds);
+                return (Bounds)(NColliderBounds);
             }
         }
         #endregion
         [HideInInspector]
-        public SpriteRenderer SpriteRenderer;
-        #region Sprite Related Data
-        public Sprite Sprite => SpriteRenderer.sprite;
-        #endregion
+        public MeshRenderer Renderer;
         #region Transform Related Data
         public Quaternion QuaternionRotation
         {
@@ -111,7 +106,7 @@ namespace Common3D
         {
             Rigidbody = GetComponent<Rigidbody>(); // Rigidbody should be attached to the mobile entity itself
             Collider = GetComponentInChildren<Collider>(); // Colliders may be children
-            SpriteRenderer = GetComponentInChildren<SpriteRenderer>(); // Sprite renderers may be children
+            Renderer = GetComponent<MeshRenderer>();
             MiscellaneousInit();
             OnAwake();
         }

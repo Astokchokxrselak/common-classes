@@ -12,7 +12,8 @@ namespace Common.UI
         public int nextScene = -1; // -1 to mean not applicable
         [Space()]
         public bool loop, resetOnDisable;
-        public int currentIndex;
+        [SerializeField]
+        private int currentIndex;
         public int CurrentIndex
         {
             get => currentIndex;
@@ -25,7 +26,6 @@ namespace Common.UI
                 }
                 else
                 {
-                    print(currentIndex);
                     if (currentIndex >= transform.childCount)
                     {
                         if (fadeOutTimeAtEnd != -1)

@@ -37,6 +37,7 @@ namespace Common.UI
     {
         protected Bar bar;
         public Image barImage;
+        public Color fullColor, emptyColor;
         // Start is called before the first frame update
         void Awake()
         {
@@ -71,13 +72,15 @@ namespace Common.UI
         }
 
         // Update is called once per frame
-        public void UpdateBar(float health, float maxHealth)
+        public void UpdateBar(float current, float max)
         {
-            bar.Ratio = health / maxHealth;
+            bar.Ratio = current / max;
+            bar.bar.color = Color.Lerp(emptyColor, fullColor, bar.Ratio);
         }
         public void UpdateBar(IDamageable reference)
         {
             bar.Ratio = reference.Health / reference.MaxHealth;
+            bar.bar.color = Color.Lerp(emptyColor, fullColor, bar.Ratio);
         }
     }
 }

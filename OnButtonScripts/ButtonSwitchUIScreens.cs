@@ -11,7 +11,24 @@ namespace Common.UI
         public Transform parent;
         public int targetScreen, defaultScreen = -1;
         bool triggered;
+
+        private NextScreenOnButtonManager _manager;
+        public override void OnInitialize()
+        {
+            parent.TryGetComponent(out _manager);
+        }
         public override void OnButtonClick()
+        {
+            if (_manager)
+            {
+                _Manager_OnClick();
+            }
+            else
+            {
+                _NoManager_OnClick();
+            }
+        }
+        private void _NoManager_OnClick()
         {
             triggered = !triggered;
             if (triggered)
@@ -23,6 +40,20 @@ namespace Common.UI
                 OnDisabled();
             }
         }
+
+        private void _Manager_OnClick()
+        {
+            triggered = !triggered;
+            if (triggered)
+            {
+                _manager.CurrentIndex = targetScreen;
+            }
+            else if (defaultScreen != -1)
+            {
+                _manager.CurrentIndex = defaultScreen;
+            }
+        }
+
         private void OnEnable()
         {
             triggered = false;

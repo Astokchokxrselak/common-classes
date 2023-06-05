@@ -76,5 +76,15 @@ namespace Common
             }
             else SceneManager.LoadScene(nextScene);
         }
+
+        public static void FadeInOut(Action onFadeIn)
+        {
+            ScreenEffects.OnScreenFaded += onFadeIn + new Action(() => {
+                ScreenEffects.FadeScreen(instance, instance.fadeInTime, Color.clear);
+            });
+
+            print(instance);
+            ScreenEffects.FadeScreen(instance, instance.fadeInTime, Color.black);
+        }
     }
 }

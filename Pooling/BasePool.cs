@@ -20,6 +20,7 @@ namespace Common.Pools
         public Transform pool;
         public GameObject[] objectReferences; // by default selects first object
         public IPoolObject[] Objects;
+        public int activeObjects => Objects.Count(o => o.GameObject.activeInHierarchy);
         public int count = 1;
         // Start is called before the first frame update
 

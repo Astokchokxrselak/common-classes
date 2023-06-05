@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Device;
 
 namespace Common
 {
@@ -296,6 +295,15 @@ namespace Common
     {
         public static class MathHelper
         {
+            /// <summary>
+            /// The triangle function, Arcsin(sin(x)).
+            /// </summary>
+            /// <param name="deg"></param>
+            /// <returns></returns>
+            public static float LineSin(float deg)
+            {
+                return Mathf.Asin(Mathf.Sin(deg));
+            }
             public static Vector3 VectorRotatedByVector(Vector3 inVec, Vector3 rotVec)
             {
                 return Quaternion.LookRotation(rotVec) * inVec;
@@ -339,10 +347,26 @@ namespace Common
         {
             public static Vector2 Resolution(Camera camera) => new Vector2(camera.scaledPixelWidth, camera.scaledPixelHeight);
             public static Vector2 Resolution() => Resolution(Camera.main);
+            public static Vector2 LeftmostExtent(Camera camera) => camera.transform.position - Vector3.right * WorldWidth() / 2f;
+            public static Vector2 LeftmostExtent() => LeftmostExtent(Camera.main);
+            public static Vector2 UppermostExtent(Camera camera) => camera.transform.position + Vector3.up * WorldLength() / 2f;
+            public static Vector2 UppermostExtent() => UppermostExtent(Camera.main);
             public static Vector2 WorldResolution(Camera camera) => camera.ScreenToWorldPoint(Resolution(camera));
             public static Vector2 WorldResolution() => WorldResolution(Camera.main);
+            /// <summary>
+            /// The width of the camera screen, in world coordinates.
+            /// </summary>
+            /// <returns></returns>
             public static float WorldWidth() => (WorldResolution() - (Vector2)Camera.main.transform.position).x * 2;
+            /// <summary>
+            /// The length of the camera screen, in world coordinates.
+            /// </summary>
+            /// <returns></returns>
             public static float WorldLength() => (WorldResolution() - (Vector2)Camera.main.transform.position).y * 2;
+            /// <summary>
+            /// A Vector2 containing <see cref="WorldWidth"/> and <see cref="WorldLength"/> as its respective coordinates.
+            /// </summary>
+            /// <returns></returns>
             public static Vector2 WorldDimensions() => new Vector2(WorldWidth(), WorldLength());
             public static Vector2 SignedPoint(Camera camera, Vector2 point) // assuming the point is already for an unsigned resolution, i.e. within the bounds of 0 to 840
             {
@@ -543,6 +567,24 @@ namespace Common
     {
         public static class MathExtensions
         {
+            public static Vector2 Reciprocal(this Vector2 vector2)
+            {
+                return new(1 / vector2.x, 1 / vector2.y);
+            }
+            public static Vector3 Reciprocal(this Vector3 vector3)
+            {
+                return new(1 / vector3.x, 1 / vector3.y, 1 / vector3.z);
+            }
+            public static Vector2 Clamped(this Vector2 vector2, float minMagnitude, float maxMagnitude)
+            {
+                var vec = vector2.normalized;
+                return vec * Mathf.Clamp(vector2.magnitude, minMagnitude, maxMagnitude);
+            }
+            public static Vector3 Clamped(this Vector3 vector3, float minMagnitude, float maxMagnitude)
+            {
+                var vec = vector3.normalized;
+                return vec * Mathf.Clamp(vector3.magnitude, minMagnitude, maxMagnitude);
+            }
             public static Vector2 RotatedBy(this Vector2 vector2, float angle)
             {
                 return Quaternion.Euler(0, 0, angle) * vector2;
@@ -663,6 +705,29 @@ namespace Common
                 }
                 return sum / transform.childCount;
             }
+
+            public static T FindComponent<T>(this Transform transform, string name) where T : Component
+            {
+                var trans = transform.Find(name);
+                return trans.GetComponent<T>();
+            }
+            public static bool TryFindComponent<T>(this Transform transform, string name, out T component)
+            {
+                var trans = transform.Find(name);
+                return trans.TryGetComponent(out component);
+            }
+            public static bool TryFindComponentInChildren<T>(this Transform transform, string name, out T component) where T : Component
+            {
+                var trans = transform.Find(name);
+                var comp = trans.GetComponentInChildren<T>();
+                if (!comp)
+                {
+                    component = null;
+                    return false;
+                }
+                component = comp;
+                return true;
+            }
         }
         public static class SequenceExtensions
         {
@@ -729,9 +794,57 @@ namespace Common
         }
         public static class OtherExtensions
         {
+            /*public static void DrawParametric(this LineRenderer trajectory, Vector3 origin, int trajectoryAccuracy, Func<float, float> dx_dt, Func<float, float> dy_dt)
+            {
+                trajectory.transform.position = origin;
+
+                // use the distance from the player as the velocity vector
+                Vector2 displacement = (cursor.transform.position - transform.position);
+                if (displacement.x == 0 || displacement.y == 0)
+                {
+                    return;
+                }
+
+                displacement.y += power - 1f;
+                Vector2 velocity = CalculateArrowVelocity();
+
+                float x = 0, y = 0;
+                float deltaX = displacement.x / trajectoryAccuracy;
+                // kinematics equation v_ox*t = deltaX
+                // float t = deltaX/v_ox = deltaX / velocity.x
+                // kinematics equation v_oy*t - gt^2/2 = deltaY
+                // velocity.y * t - (Physics2D.gravity * t * t) / 2
+
+                for (int i = 0; i < trajectoryAccuracy; i++)
+                {
+                    trajectory.SetPosition(i, origin + new Vector3(x, y));
+                    x += dx_dt(i) * Time.fixedDeltaTime;
+                    y += dy_dt(i) * Time.fixedDeltaTime;
+                    velocity.y += Physics2D.gravity.y * Time.fixedDeltaTime;
+                }
+            }*/
             public static float Aspect(this Sprite sprite) => Helpers.MathHelper.Ratio(sprite.rect.size);
             public static Vector2 Size(this Texture2D tex) => new(tex.width, tex.height);
             public static Color RGB(this Color color) => new(color.r, color.g, color.b, 1);
+            /// <summary>
+            /// This function is a shorthand for "camera.transform.position = other.position + Vector3.forward * camera.transform.position.z" for 2D contexts.
+            /// </summary>
+            /// <param name="camera"></param>
+            /// <param name="other"></param>
+            public static void Focus(this Camera camera, Transform other)
+            {
+                camera.transform.LookAt(other);
+            }
+            public static void LerpFocus(this Camera camera, Transform other, float t)
+            {
+                camera.transform.rotation = Quaternion.Lerp(camera.transform.rotation, Quaternion.LookRotation(other.position - camera.transform.position), t);
+            }
+            public static void Focus2D(this Camera camera, Transform other) => camera.transform.position = other.position + (Vector3.forward * camera.transform.position.z);
+            public static void LerpFocus2D(this Camera camera, Transform other, float t)
+            {
+                var lerp2D = Vector2.Lerp(camera.transform.position, other.position, t);
+                camera.transform.position = (Vector3)lerp2D + (Vector3.forward * camera.transform.position.z);
+            }
         }
     }
     namespace Yields
@@ -739,6 +852,11 @@ namespace Common
         public abstract class WaitAnd : CustomYieldInstruction
         {
             protected Action andMethod;
+            public WaitAnd(Action andMethod)
+            {
+                this.andMethod = andMethod;
+            }
+
             protected abstract bool Condition();
             public override bool keepWaiting
             {
@@ -752,10 +870,9 @@ namespace Common
         public class WaitForSecondsAnd : WaitAnd
         {
             private readonly float stopTime;
-            public WaitForSecondsAnd(float seconds, Action action)
+            public WaitForSecondsAnd(float seconds, Action action) : base(action)
             {
                 this.stopTime = Time.time + seconds;
-                this.andMethod = action;
             }
             protected override bool Condition()
             {
@@ -765,10 +882,9 @@ namespace Common
         public class WaitUntilAnd : WaitAnd
         {
             private Func<bool> condition;
-            public WaitUntilAnd(Func<bool> condition, Action action)
+            public WaitUntilAnd(Func<bool> condition, Action action) : base(action)
             {
                 this.condition = condition;
-                this.andMethod = action;
             }
             protected override bool Condition()
             {
@@ -792,6 +908,20 @@ namespace Common
                     Debug.Log(stopTime - Time.time);
                     return stopTime > Time.time && !condition();
                 }
+            }
+        }
+        public class WaitForSecondsOrUntilAnd : WaitAnd
+        {
+            private readonly float stopTime;
+            private Func<bool> condition;
+            public WaitForSecondsOrUntilAnd(float seconds, Func<bool> condition, Action action) : base(action)
+            {
+                this.stopTime = Time.time + seconds;
+                this.condition = condition;
+            }
+            protected override bool Condition()
+            {
+                return stopTime > Time.time && !condition(); // if condition is not yet met, keep waiting
             }
         }
     }
