@@ -428,6 +428,7 @@ namespace Common
         }
         public static class InputHelper
         {
+            public static bool AnyInput() => GetRawInput() != Vector2.zero;
             public static Vector2 GetInput()
             {
                 return new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
