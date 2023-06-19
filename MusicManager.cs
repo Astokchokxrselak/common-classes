@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Common
 {
+    [RequireComponent(typeof(AudioSource))]
     public class MusicManager : MonoBehaviour
     {
         Dictionary<string, AudioClip> music = new Dictionary<string, AudioClip>();

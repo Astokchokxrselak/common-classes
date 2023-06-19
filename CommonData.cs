@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Common
 {
@@ -293,6 +296,13 @@ namespace Common
 
     namespace Helpers
     {
+        public static class ComponentHelper
+        {
+            public static T FindObjectOfName<T>(string name) where T : Component
+            {
+                return GameObject.Find(name).GetComponent<T>();
+            }
+        }
         public static class MathHelper
         {
             /// <summary>
@@ -303,6 +313,16 @@ namespace Common
             public static float LineSin(float deg)
             {
                 return Mathf.Asin(Mathf.Sin(deg));
+            }
+            /// <summary>
+            /// The triangle function with amplitude 1 and period 1.
+            /// </summary>
+            /// <param name="deg"></param>
+            /// <returns></returns>
+            public static float LineSin01A1T1(float deg)
+            {
+                var pi = Mathf.PI;
+                return Mathf.Abs(2 / pi * LineSin(deg * 2 * Mathf.PI));
             }
             public static Vector3 VectorRotatedByVector(Vector3 inVec, Vector3 rotVec)
             {
@@ -347,9 +367,9 @@ namespace Common
         {
             public static Vector2 Resolution(Camera camera) => new Vector2(camera.scaledPixelWidth, camera.scaledPixelHeight);
             public static Vector2 Resolution() => Resolution(Camera.main);
-            public static Vector2 LeftmostExtent(Camera camera) => camera.transform.position - Vector3.right * WorldWidth() / 2f;
+            public static Vector2 LeftmostExtent(Camera camera) => camera.transform.position - Vector3.right * camera.orthographicSize * camera.aspect;
             public static Vector2 LeftmostExtent() => LeftmostExtent(Camera.main);
-            public static Vector2 UppermostExtent(Camera camera) => camera.transform.position + Vector3.up * WorldLength() / 2f;
+            public static Vector2 UppermostExtent(Camera camera) => camera.transform.position + Vector3.up * camera.orthographicSize;
             public static Vector2 UppermostExtent() => UppermostExtent(Camera.main);
             public static Vector2 WorldResolution(Camera camera) => camera.ScreenToWorldPoint(Resolution(camera));
             public static Vector2 WorldResolution() => WorldResolution(Camera.main);
@@ -357,12 +377,14 @@ namespace Common
             /// The width of the camera screen, in world coordinates.
             /// </summary>
             /// <returns></returns>
-            public static float WorldWidth() => (WorldResolution() - (Vector2)Camera.main.transform.position).x * 2;
+            public static float WorldWidth() => WorldWidth(Camera.main);
+            public static float WorldWidth(Camera camera) => (WorldResolution(camera) - (Vector2)camera.transform.position).x * 2;
             /// <summary>
             /// The length of the camera screen, in world coordinates.
             /// </summary>
             /// <returns></returns>
-            public static float WorldLength() => (WorldResolution() - (Vector2)Camera.main.transform.position).y * 2;
+            public static float WorldLength() => WorldLength(Camera.main);
+            public static float WorldLength(Camera camera) => (WorldResolution(camera) - (Vector2)camera.transform.position).y * 2;
             /// <summary>
             /// A Vector2 containing <see cref="WorldWidth"/> and <see cref="WorldLength"/> as its respective coordinates.
             /// </summary>
@@ -428,6 +450,23 @@ namespace Common
         }
         public static class InputHelper
         {
+            /// <summary>
+            /// This function returns true if the RIGHT mouse is currently held down AND there is no UI/pointer event handling object beneath the cursor.
+            /// </summary>
+            /// <returns></returns>
+            public static bool GetMouse() => !CommonGameManager.IsMouseOverUIObject && Input.GetMouseButton(0);
+
+            /// <summary>
+            /// This function returns true if the RIGHT mouse is currently held down AND there is no UI/pointer event handling object beneath the cursor.
+            /// </summary>
+            /// <returns></returns>
+            public static bool GetMouseDown() => !CommonGameManager.IsMouseOverUIObject && Input.GetMouseButtonDown(0);
+
+            /// <summary>
+            /// This function returns true if the RIGHT mouse is currently held down AND there is no UI/pointer event handling object beneath the cursor.
+            /// </summary>
+            /// <returns></returns>
+            public static bool GetMouseUp() => !CommonGameManager.IsMouseOverUIObject && Input.GetMouseButtonUp(0);
             public static Vector2 GetInput()
             {
                 return new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
@@ -458,6 +497,14 @@ namespace Common
         }
         public static class StringHelper
         {
+            public static string IntToChar(int i)
+            {
+                return ((char)(i + 65)).ToString();
+            }
+            public static int CharToInt(char c)
+            {
+                return c - 65;
+            }
             public static string ToTime(double input)
             {
                 TimeSpan t = TimeSpan.FromSeconds(input);
@@ -467,6 +514,27 @@ namespace Common
                                 t.Minutes,
                                 t.Seconds);
                 return answer;
+            }
+            // returns the next index of the string
+            public static int RichTextAddToken(string @string, ref string text, int index)
+            {
+                string t = @string[index].ToString();
+                if (t == "<")
+                {
+                    int len = 0;
+                    for (int j = index; j < @string.Length; j++)
+                    {
+                        len++;
+                        if (@string[j] == '>')
+                        {
+                            break;
+                        }
+                    }
+                    t = @string.Substring(index, len);
+                    index += len - 1;
+                }
+                text += t;
+                return index + 1; // i++
             }
         }
 
@@ -567,6 +635,14 @@ namespace Common
     {
         public static class MathExtensions
         {
+            public static Vector2 Resized(this Vector2 vector2, float magnitude)
+            {
+                return vector2.normalized * magnitude;
+            }
+            public static Vector3 Resized(this Vector3 vector3, float magnitude)
+            {
+                return vector3.normalized * magnitude;
+            }
             public static Vector2 Reciprocal(this Vector2 vector2)
             {
                 return new(1 / vector2.x, 1 / vector2.y);
@@ -695,7 +771,6 @@ namespace Common
                     }
                 } return null;
             }
-
             public static Vector3 CenterOfMass(this Transform transform)
             {
                 Vector3 sum = Vector3.zero;
@@ -705,7 +780,29 @@ namespace Common
                 }
                 return sum / transform.childCount;
             }
-
+            public static void DrawRay(this LineRenderer line, Vector3 origin, Vector3 lendir, Color col)
+            {
+                if (line.positionCount != 2)
+                {
+                    line.positionCount = 2;
+                }
+                line.SetPosition(0, origin);
+                line.SetPosition(1, lendir + origin);
+                line.startColor = line.endColor = col;
+            }
+            public static Func<MonoBehaviour, Coroutine> FadeIn(this Graphic graphic, float time)
+            {
+                IEnumerator _IEnum()
+                {
+                    for (float t = 0; t <= time; t += Time.fixedDeltaTime)
+                    {
+                        var r = t / time;
+                        graphic.color = graphic.color.WithAlpha(r);
+                        yield return new WaitForFixedUpdate();
+                    }
+                }
+                return m => m.StartCoroutine(_IEnum());
+            }
             public static T FindComponent<T>(this Transform transform, string name) where T : Component
             {
                 var trans = transform.Find(name);
@@ -763,6 +860,35 @@ namespace Common
                     return default;
                 }
             }
+            public static void Shuffle<T>(this T[] seq)
+            {
+                var hashSet = new HashSet<int>(); // Create a hashset.
+                for (int i = 0; i < seq.Length; i++)
+                {
+                    int num;
+                    do
+                    {
+                        num = Helpers.RandomHelper.RandomNumber(0, seq.Length - 1);
+                    } while (hashSet.Contains(num));
+                    hashSet.Add(num);
+                }
+
+                int index = 0;
+                foreach (var el in hashSet)
+                {
+                    Debug.Log(el);
+                    (seq[index], seq[el]) = (seq[el], seq[index]);
+                    index++;
+                }
+            }
+            public static void Shuffle<T>(this List<T> seq)
+            {
+                for (int i = seq.Count - 1; i >= 0; i--)
+                {
+                    var rand = Helpers.RandomHelper.RandomNumber(0, i);
+                    (seq[i], seq[rand]) = (seq[rand], seq[i]);
+                }
+            }
             public static string ArrToString<T>(this IEnumerable<T> seq)
             {
                 string @out = "{ ";
@@ -785,6 +911,18 @@ namespace Common
                 {
                     var child = transform.GetChild(i);
                     if (i != index)
+                    {
+                        child.gameObject.SetActive(false);
+                    }
+                    else child.gameObject.SetActive(true);
+                }
+            }
+            public static void IsolateChildren(this Transform transform, params int[] indices)
+            {
+                for (int i = 0; i < transform.childCount; i++)
+                {
+                    var child = transform.GetChild(i);
+                    if (!indices.Contains(i))
                     {
                         child.gameObject.SetActive(false);
                     }
@@ -823,9 +961,17 @@ namespace Common
                     velocity.y += Physics2D.gravity.y * Time.fixedDeltaTime;
                 }
             }*/
+            public static void SetTextIfNotFocused(this TMPro.TMP_InputField input, string text)
+            {
+                if (!input.isFocused)
+                {
+                    input.text = text;
+                }
+            }
             public static float Aspect(this Sprite sprite) => Helpers.MathHelper.Ratio(sprite.rect.size);
             public static Vector2 Size(this Texture2D tex) => new(tex.width, tex.height);
             public static Color RGB(this Color color) => new(color.r, color.g, color.b, 1);
+            public static Color WithAlpha(this Color color, float a) => new(color.r, color.g, color.b, a);
             /// <summary>
             /// This function is a shorthand for "camera.transform.position = other.position + Vector3.forward * camera.transform.position.z" for 2D contexts.
             /// </summary>
@@ -839,10 +985,15 @@ namespace Common
             {
                 camera.transform.rotation = Quaternion.Lerp(camera.transform.rotation, Quaternion.LookRotation(other.position - camera.transform.position), t);
             }
-            public static void Focus2D(this Camera camera, Transform other) => camera.transform.position = other.position + (Vector3.forward * camera.transform.position.z);
+            public static void Focus2D(this Camera camera, Transform other) => Focus2D(camera, other.position);
+            public static void Focus2D(this Camera camera, Vector3 position) => camera.transform.position = position + (Vector3.forward * camera.transform.position.z);
             public static void LerpFocus2D(this Camera camera, Transform other, float t)
             {
-                var lerp2D = Vector2.Lerp(camera.transform.position, other.position, t);
+                LerpFocus2D(camera, other.position, t);
+            }
+            public static void LerpFocus2D(this Camera camera, Vector3 position, float t)
+            {
+                var lerp2D = Vector2.Lerp(camera.transform.position, position, t);
                 camera.transform.position = (Vector3)lerp2D + (Vector3.forward * camera.transform.position.z);
             }
         }

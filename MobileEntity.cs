@@ -21,11 +21,13 @@ namespace Common
         private Collider2D m_collider2D; 
         private SpriteRenderer m_spriteRenderer;
         private Animator m_animator;
+        private SFXData m_sfx;
 
         public Rigidbody2D Rigidbody2D => m_rigidbody2D;
         public Collider2D Collider => m_collider2D;
         public SpriteRenderer SpriteRenderer => m_spriteRenderer;
         public Animator Animator => m_animator;
+        public SFXData SFX => m_sfx;
 
         // Start is called before the first frame update
         public virtual void OnAwake()
@@ -44,6 +46,7 @@ namespace Common
             TryGetComponent(out m_collider2D);
             TryGetComponent(out m_spriteRenderer);
             TryGetComponent(out m_animator);
+            TryGetComponent(out m_sfx);
             OnAwake();
         }
         public void SetActive(bool active) => gameObject.SetActive(active);

@@ -8,6 +8,7 @@ namespace Common
     [RequireComponent(typeof(AudioSource))]
     public class SFXData : MonoBehaviour
     {
+        [Tooltip("Omit the slash.")]
         public string sourceFolder;
         public AudioClip this[string clip] => sfx[clip];
         Dictionary<string, AudioClip> sfx = new Dictionary<string, AudioClip>();

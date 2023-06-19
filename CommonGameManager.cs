@@ -17,9 +17,10 @@ namespace Common
         public float defaultTimeScale = 1f;
         public float screenshakeMultiplier = 1f;
 
+        public static bool IsMouseOverUIObject => UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
         public static Vector2 MouseDelta => Input.mousePosition - instance.oldMouse;
         public static Vector2 MouseVector => new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y") * InvertedMouseYToggle.Multiplier) * MouseSensitivitySlider.mouseSensitivity;
-        private void Awake()
+        public void Awake()
         {
             instance = this;
             ScreenEffects.ResetScreen();
@@ -33,6 +34,7 @@ namespace Common
         {
             ScreenEffects.Update();
             GameUpdate();
+            UpdateLastKeyPress();
         }
         protected virtual void GameAwake()
         {
@@ -66,6 +68,10 @@ namespace Common
         {
             instance.StartCoroutine(_KillOffscreen(gameObject));
         }
+        public static void SwitchScenes(int nextScene)
+        {
+            SwitchScenes(nextScene, instance.fadeInTime);
+        }
         public static void SwitchScenes(int nextScene, float fadeToBlackTime)
         {
             if (fadeToBlackTime != 0)
@@ -85,6 +91,28 @@ namespace Common
 
             print(instance);
             ScreenEffects.FadeScreen(instance, instance.fadeInTime, Color.black);
+        }
+
+        private static float _durationOfLastKeyPress;
+        public static bool IsKeyHeldFor(KeyCode key, float minDuration) => Input.GetKey(key) && KeyPressDuration >= minDuration;
+        /// <summary>
+        /// This should be used exclusively in Coroutines or FixedUpdate contexts, as input gets a little wonky there. key - the key pressed. maxDuration - the maximum duration the key has been held before it is not considered "down" but "held".
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="maxDuration"></param>
+        /// <returns></returns>
+        public static bool IsKeyDown(KeyCode key, float maxDuration) => Input.GetKey(key) && KeyPressDuration < maxDuration;
+        public static float KeyPressDuration => _durationOfLastKeyPress;
+        private void UpdateLastKeyPress()
+        {
+            if (Input.anyKey)
+            {
+                _durationOfLastKeyPress += Time.deltaTime;
+            }
+            else
+            {
+                _durationOfLastKeyPress = 0;
+            }
         }
     }
 }

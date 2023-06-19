@@ -54,7 +54,7 @@ namespace Common.Pools
         }
         public virtual IPoolObject OnInitializeObject(GameObject obj)
         {
-            var poolObject = obj.GetOrAddComponent<PoolObject>();
+            var poolObject = obj.GetComponent<IPoolObject>() ?? obj.GetOrAddComponent<PoolObject>();
             return poolObject;
         }
         public virtual void OnDestroyedObject(IPoolObject poolObject)

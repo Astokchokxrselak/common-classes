@@ -7,8 +7,8 @@ using Common;
 
 namespace Common.UI
 {
-    [AddComponentMenu("UI/On Button/Go to Next Scene On Button")]
-    public class ButtonNextScene : OnButton
+    [AddComponentMenu("UI/On Button/Go to Scene On Button")]
+    public class ButtonGotoScene : OnButton
     {
         public int nextScene;
         public float fadeToBlackTime;

@@ -102,7 +102,7 @@ namespace Common3D
         public virtual void OnAwake()
         {
         }
-        private void Awake()
+        public void Awake()
         {
             Rigidbody = GetComponent<Rigidbody>(); // Rigidbody should be attached to the mobile entity itself
             Collider = GetComponentInChildren<Collider>(); // Colliders may be children
