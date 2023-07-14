@@ -183,6 +183,11 @@ namespace Common
             get => Velocity.y;
             set => Velocity = new Vector2(VelocityX, value);
         }
+
+        public Vector2 SpeedVector => MathHelper.AbsoluteVector2(Velocity);
+        public float Speed => Velocity.magnitude;
+        public float SpeedX => SpeedVector.x;
+        public float SpeedY => SpeedVector.y;
         public float Rotation
         {
             get => Rigidbody2D.rotation;

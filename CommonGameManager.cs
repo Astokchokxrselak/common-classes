@@ -32,10 +32,14 @@ namespace Common
         }
         private void Update()
         {
+            UpdateFrameRate();
             ScreenEffects.Update();
             GameUpdate();
             UpdateLastKeyPress();
         }
+        private static float frameRate;
+        private static void UpdateFrameRate() => frameRate = 1f / Time.deltaTime;
+        public static float FrameRate => frameRate;
         protected virtual void GameAwake()
         {
 

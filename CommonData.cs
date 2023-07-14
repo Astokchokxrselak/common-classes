@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -305,6 +304,7 @@ namespace Common
         }
         public static class MathHelper
         {
+            public static float Damping(float r, float x) => Mathf.Exp(r * -x) * Mathf.Cos(2 * Mathf.PI * x);
             /// <summary>
             /// The triangle function, Arcsin(sin(x)).
             /// </summary>
