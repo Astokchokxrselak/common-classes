@@ -5,18 +5,23 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
+using UnityEngine.Rendering;
+
+using Common.Extensions;
+
 namespace Common
 {
     public class CompositeMobileEntity : MobileEntity
     {
-        int sortingOrderOffset = 0;
+        SortingGroup _myGroup;
+        new public int SortingOrder
+        {
+            get => _myGroup.sortingOrder;
+            set => _myGroup.sortingOrder = value;
+        }
         public void SetSortingOrderOffset(int nOrder)
         {
-            sortingOrderOffset = nOrder;
-            for (int i = 0; i < myRenderers.Length; i++)
-            {
-                myRenderers[i].sortingOrder += nOrder - sortingOrderOffset;
-            }
+            _myGroup.sortingOrder = nOrder;
         }
 
         SpriteRenderer[] myRenderers;
@@ -76,6 +81,9 @@ namespace Common
         }
         public override void OnAwake()
         {
+            _myGroup = this.GetOrAddComponent<SortingGroup>();
+            _myGroup.sortAtRoot = true;
+
             myRenderers = GetComponentsInChildren<SpriteRenderer>();
             myColliders = GetComponentsInChildren<Collider2D>();
         }

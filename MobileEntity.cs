@@ -162,7 +162,7 @@ namespace Common
         public float ScaleAsMultiplier => ScaleVector.magnitude;
         public void SetScale(float value) 
         { 
-            transform.localScale = realScale * value;
+            transform.localScale = (Vector3)realScale * value + Vector3.forward;
         }
 
         /*
