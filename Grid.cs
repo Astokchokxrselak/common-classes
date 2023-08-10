@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
 namespace Match3Game
 {
     public class Tile
@@ -173,3 +174,4 @@ namespace Match3Game
         }
     }
 }
+*/

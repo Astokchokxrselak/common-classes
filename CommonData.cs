@@ -108,6 +108,14 @@ namespace Common
             } 
             return hit;
         }
+        /// <summary>
+        /// Will the timer pass the value t on the next frame?
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public bool WillPassNext(float t) => timer + Time.unscaledDeltaTime > t;
+        public bool RatioWillPassNext(float t) => (timer + Time.unscaledDeltaTime) / max > t;
+        public bool RangetioWillPassNext(float p, float pm) => RatioWillPassNext(p / pm);
         public float ClampedDecrement()
         {
             return ClampedDecrement(Time.unscaledDeltaTime);
@@ -146,6 +154,9 @@ namespace Common
         public float SetZero() => timer = 0;
         public float ClampedRatio => Mathf.Clamp01(Ratio);
         public float Ratio => Max == 0 ? 0f : timer / max;
+        public float Rangetio(float mi, float ma) => Mathf.Clamp01((Ratio - mi) / (ma - mi));
+        public float RangetioPhases(float p1, float p2, float pm) => Rangetio((float)p1 / pm, (float)p2 / pm);
+        public float RangetioPhases(float p1, float pm) => RangetioPhases(p1, pm, pm);
         public static explicit operator float(Timer timer) => timer.timer;
         public static Timer operator -(Timer timer, float flt) => new Timer(timer.timer - flt, timer.Max);
         public static Timer operator +(Timer timer, float flt) => new Timer(timer.timer - flt, timer.Max);
