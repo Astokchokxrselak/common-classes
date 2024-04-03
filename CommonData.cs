@@ -643,6 +643,10 @@ namespace Common
             }
             public static bool RandomBool(float bias) => UnityEngine.Random.value < bias;
             public static float RandomSigned() => MathHelper.Float01ToNegRange(UnityEngine.Random.value);
+            public static Vector2 RandomVector2Direction(float magnitude) {
+                var norm = UnityEngine.Random.insideUnitCircle;
+                return norm.normalized * magnitude;
+            }
         }
     }
     namespace Extensions

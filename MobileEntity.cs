@@ -159,6 +159,16 @@ namespace Common
             get => transform.localScale;
             set => transform.localScale = realScale = value;
         }
+        public float ScaleX 
+        {
+            get => ScaleVector.x;
+            set => transform.localScale = new(value, transform.localScale.y);
+        }
+        public float ScaleY
+        {
+            get => ScaleVector.y;
+            set => transform.localScale = new(transform.localScale.x, value);
+        }
         public float ScaleAsMultiplier => ScaleVector.magnitude;
         public void SetScale(float value) 
         { 
